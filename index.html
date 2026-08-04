@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="네이버 스마트스토어 카테고리명과 코드를 검색하고 바로 복사하세요.">
+  <title>스마트스토어 카테고리 찾기</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header class="topbar">
+      <a class="brand" href="#">스마트스토어 <span>카테고리 찾기</span></a>
+      <div class="status"><i></i> 2026.08.04 최신 · 4,999개</div>
+    </header>
+    <section class="hero">
+      <div class="eyebrow">NAVER SMARTSTORE CATEGORY LOOKUP</div>
+      <h1>카테고리 코드를<br><em>3초 만에.</em></h1>
+      <p>상품명을 떠올리듯 검색하세요.<br class="mobileBreak"> 최신 스마트스토어 카테고리 코드까지 바로 복사할 수 있어요.</p>
+      <div class="searchBox">
+        <span class="searchIcon" aria-hidden="true">⌕</span>
+        <input id="search" autofocus placeholder="예: 여성 원피스, 캠핑 텐트, CC크림" aria-label="카테고리 검색">
+        <button id="clear" class="clear" aria-label="검색어 지우기" hidden>×</button>
+      </div>
+      <div class="chips">
+        <span>빠른 검색</span>
+        <button data-query="원피스">원피스</button><button data-query="노트북">노트북</button>
+        <button data-query="영양제">영양제</button><button data-query="강아지">강아지</button>
+        <button data-query="캠핑">캠핑</button>
+      </div>
+    </section>
+    <section class="results" aria-live="polite">
+      <div class="resultHead">
+        <div><b id="result-title">카테고리를 검색해 주세요</b><span id="result-count" hidden></span></div>
+        <small>카테고리명 또는 8자리 코드로 검색</small>
+      </div>
+      <div id="list" class="list"><div class="empty"><b>무엇을 판매하시나요?</b><p>상품과 가장 가까운 단어를 입력하면 전체 경로와 코드를 찾아드려요.</p></div></div>
+    </section>
+    <footer>
+      <span>스마트스토어 카테고리 찾기</span>
+      <p>2026년 8월 4일 최신 카테고리 파일을 기준으로 합니다.<br>카테고리 체계는 네이버 정책에 따라 변경될 수 있습니다.</p>
+      <b>4,999개 카테고리 수록</b>
+    </footer>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>
