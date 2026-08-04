@@ -36,12 +36,20 @@
       </div>
       <div id="list" class="list"><div class="empty"><b>무엇을 판매하시나요?</b><p>상품과 가장 가까운 단어를 입력하면 전체 경로와 코드를 찾아드려요.</p></div></div>
     </section>
+    <section class="workbench" aria-labelledby="work-title">
+      <div class="workHead"><div><span>KEYWORD WORKSPACE</span><h2 id="work-title">키워드 작업칸 <em id="work-count">0개</em></h2></div><div><button id="clear-work">전체 삭제</button><button id="copy-work" class="primary">전체 복사</button></div></div>
+      <div id="work-list" class="workList"></div>
+    </section>
     <footer>
       <span>스마트스토어 카테고리 찾기</span>
       <p>2026년 8월 4일 최신 카테고리 파일을 기준으로 합니다.<br>카테고리 체계는 네이버 정책에 따라 변경될 수 있습니다.</p>
       <b>4,999개 카테고리 수록</b>
     </footer>
   </main>
+  <dialog id="keyword-dialog" class="keywordDialog">
+    <div class="dialogHead"><div><span>POPULAR KEYWORDS TOP 100</span><h2 id="keyword-title">인기검색어</h2><p id="keyword-path"></p><small id="keyword-period"></small></div><button id="close-keywords" aria-label="닫기">×</button></div>
+    <div id="keyword-content"></div>
+  </dialog>
   <script src="app.js" defer></script>
 </body>
 </html>
