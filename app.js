@@ -1,5 +1,5 @@
 const MAX_RESULTS = 100;
-const API_BASE_URL = "https://sourcing-keyword-api-preview.shell-backbone.workers.dev";
+const API_BASE_URL = "https://sourcing-keyword-api.vercel.app";
 const STORAGE_KEY = "sourcing-keyword-worklist-v1";
 let categories = [];
 let selectedKeywords = loadSelectedKeywords();
@@ -14,8 +14,11 @@ const keywordTitle = document.querySelector("#keyword-title");
 const keywordPath = document.querySelector("#keyword-path");
 const keywordPeriod = document.querySelector("#keyword-period");
 const keywordContent = document.querySelector("#keyword-content");
+const periodYear = document.querySelector("#period-year");
+const periodMonth = document.querySelector("#period-month");
 const workList = document.querySelector("#work-list");
 const workCount = document.querySelector("#work-count");
+let activeCategoryId = "";
 
 fetch("categories.json")
   .then((response) => response.json())
@@ -47,6 +50,27 @@ function renderWorkList() {
   workList.innerHTML = selectedKeywords.map((keyword, index) => `<button class="keywordChip" data-remove-index="${index}" title="삭제">${escapeHtml(keyword)} <span>×</span></button>`).join("");
 }
 
+function setupPeriodSelectors() {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const defaultYear = currentYear - 1;
+  for (let year = currentYear; year >= 2017; year -= 1) periodYear.add(new Option(`${year}년`, String(year), false, year === defaultYear));
+  updateMonthOptions(now.getMonth() + 1);
+}
+
+function updateMonthOptions(preferredMonth = Number(periodMonth.value) || 1) {
+  const now = new Date();
+  const year = Number(periodYear.value);
+  const minMonth = year === 2017 ? 8 : 1;
+  const maxMonth = year === now.getFullYear() ? now.getMonth() + 1 : 12;
+  periodMonth.innerHTML = "";
+  const selected = Math.min(Math.max(preferredMonth, minMonth), maxMonth);
+  for (let month = 1; month <= 12; month += 1) {
+    if (month < minMonth || month > maxMonth) continue;
+    periodMonth.add(new Option(`${month}월`, String(month), false, month === selected));
+  }
+}
+
 function runSearch() {
   const raw = input.value.trim();
   const query = raw.toLowerCase().replace(/\s+/g, "");
@@ -74,21 +98,29 @@ function runSearch() {
 }
 
 async function openPopularKeywords(categoryId) {
+  activeCategoryId = categoryId;
   const category = categories.find((item) => item.id === categoryId);
   keywordTitle.textContent = `${category?.name || categoryId} 인기검색어`;
   keywordPath.textContent = category?.path || categoryId;
-  keywordPeriod.textContent = "전년도 같은 달 · 전체 조건";
+  if (!keywordDialog.open) keywordDialog.showModal();
+  await fetchPopularKeywords();
+}
+
+async function fetchPopularKeywords() {
+  const year = periodYear.value;
+  const month = periodMonth.value;
+  keywordPeriod.textContent = `${year}년 ${String(month).padStart(2, "0")}월 · 전체 조건`;
   keywordContent.innerHTML = '<div class="keywordState"><span class="spinner"></span><b>실제 인기검색어를 불러오는 중입니다.</b><p>네이버 데이터랩 TOP100을 조회하고 있어요.</p></div>';
-  keywordDialog.showModal();
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/popular-keywords?categoryId=${encodeURIComponent(categoryId)}`);
+    const params = new URLSearchParams({ categoryId: activeCategoryId, year, month });
+    const response = await fetch(`${API_BASE_URL}/api/popular-keywords?${params}`);
     const data = await response.json();
     if (!response.ok || !Array.isArray(data.items)) throw new Error(data.message || "조회에 실패했습니다.");
     keywordPeriod.textContent = `${data.period.replace("-", "년 ")}월 · 전체 기기 · 전체 성별 · 전체 연령`;
     keywordContent.innerHTML = `<ol class="keywordList">${data.items.map((item) => `<li><span class="rank">${item.rank}</span><b>${escapeHtml(item.keyword)}</b><button data-add-keyword="${escapeHtml(item.keyword)}">추가</button></li>`).join("")}</ol>`;
   } catch (error) {
-    keywordContent.innerHTML = `<div class="keywordState error"><b>인기검색어를 불러오지 못했습니다.</b><p>${escapeHtml(error.message || "네이버 데이터랩 응답을 확인할 수 없습니다.")}</p><button data-retry-id="${categoryId}">다시 시도</button></div>`;
+    keywordContent.innerHTML = `<div class="keywordState error"><b>인기검색어를 불러오지 못했습니다.</b><p>${escapeHtml(error.message || "네이버 데이터랩 응답을 확인할 수 없습니다.")}</p><button data-retry>다시 시도</button></div>`;
   }
 }
 
@@ -121,9 +153,12 @@ keywordContent.addEventListener("click", (event) => {
     addButton.disabled = true;
     return;
   }
-  const retryButton = event.target.closest("[data-retry-id]");
-  if (retryButton) openPopularKeywords(retryButton.dataset.retryId);
+  const retryButton = event.target.closest("[data-retry]");
+  if (retryButton) fetchPopularKeywords();
 });
+
+periodYear.addEventListener("change", () => updateMonthOptions());
+document.querySelector("#period-search").addEventListener("click", fetchPopularKeywords);
 
 document.querySelector("#close-keywords").addEventListener("click", () => keywordDialog.close());
 keywordDialog.addEventListener("click", (event) => { if (event.target === keywordDialog) keywordDialog.close(); });
@@ -141,4 +176,5 @@ document.querySelector("#copy-work").addEventListener("click", async (event) => 
 });
 document.querySelector("#clear-work").addEventListener("click", () => { selectedKeywords = []; saveSelectedKeywords(); });
 
+setupPeriodSelectors();
 renderWorkList();

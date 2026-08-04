@@ -1,0 +1,11 @@
+{
+  "name": "sourcing-keyword",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check api/popular-keywords.js && node --check api/health.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

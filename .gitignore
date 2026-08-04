@@ -3,3 +3,13 @@ Thumbs.db
 .wrangler/
 .dev.vars
 node_modules/
+.vercel/
+.vercel-config/
+.vercel-data/
+.npm-cache/
+worker/dist/
+worker/.config/
+worker/worker-configuration.d.ts
+worker/test-preview.mjs
+
+.vercel

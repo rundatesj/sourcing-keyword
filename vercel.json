@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/popular-keywords.js": {
+      "maxDuration": 30
+    }
+  }
+}
