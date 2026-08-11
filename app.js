@@ -110,10 +110,10 @@ async function fetchPopularKeywords() {
   const year = periodYear.value;
   const month = periodMonth.value;
   keywordPeriod.textContent = `${year}년 ${String(month).padStart(2, "0")}월 · 전체 조건`;
-  keywordContent.innerHTML = '<div class="keywordState"><span class="spinner"></span><b>실제 인기검색어를 불러오는 중입니다.</b><p>네이버 데이터랩 TOP100을 조회하고 있어요.</p></div>';
+  keywordContent.innerHTML = '<div class="keywordState"><span class="spinner"></span><b>실제 인기검색어를 불러오는 중입니다.</b><p>네이버 데이터랩 TOP200을 조회하고 있어요.</p></div>';
 
   try {
-    const params = new URLSearchParams({ categoryId: activeCategoryId, year, month });
+    const params = new URLSearchParams({ categoryId: activeCategoryId, year, month, limit: "200" });
     const response = await fetch(`${API_BASE_URL}/api/popular-keywords?${params}`);
     const data = await response.json();
     if (!response.ok || !Array.isArray(data.items)) throw new Error(data.message || "조회에 실패했습니다.");

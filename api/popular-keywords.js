@@ -1,7 +1,8 @@
 const NAVER_ENDPOINT = "https://datalab.naver.com/shoppingInsight/getCategoryKeywordRank.naver";
 const ALLOWED_ORIGIN = "https://rundatesj.github.io";
 const PAGE_SIZE = 20;
-const PAGE_COUNT = 5;
+const DEFAULT_LIMIT = 200;
+const MAX_LIMIT = 200;
 const MAX_RESPONSE_BYTES = 1_000_000;
 
 function setCors(request, response) {
@@ -129,14 +130,15 @@ async function requestRankPage(categoryId, startDate, endDate, page) {
   throw lastError || new Error("NAVER_REQUEST_FAILED");
 }
 
-async function getPopularKeywords(categoryId, period) {
+async function getPopularKeywords(categoryId, period, limit) {
   const items = [];
-  for (let page = 1; page <= PAGE_COUNT; page += 1) {
+  const pageCount = Math.ceil(limit / PAGE_SIZE);
+  for (let page = 1; page <= pageCount; page += 1) {
     items.push(...await requestRankPage(categoryId, period.startDate, period.endDate, page));
   }
   return {
     period: `${period.year}-${String(period.month).padStart(2, "0")}`,
-    items: items.slice(0, 100),
+    items: items.slice(0, limit),
   };
 }
 
@@ -150,6 +152,14 @@ export default async function handler(request, response) {
     return response.status(400).json({ error: "INVALID_CATEGORY_ID", message: "8자리 카테고리 코드가 필요합니다." });
   }
 
+  const rawLimit = request.query.limit == null ? DEFAULT_LIMIT : Number(request.query.limit);
+  if (!Number.isInteger(rawLimit) || rawLimit < 1 || rawLimit > MAX_LIMIT) {
+    return response.status(400).json({
+      error: "INVALID_LIMIT",
+      message: `limit은 1부터 ${MAX_LIMIT}까지의 정수여야 합니다.`,
+    });
+  }
+
   let period;
   try {
     period = selectedPeriod(request.query.year, request.query.month);
@@ -161,11 +171,12 @@ export default async function handler(request, response) {
   }
 
   try {
-    const result = await getPopularKeywords(categoryId, period);
+    const result = await getPopularKeywords(categoryId, period, rawLimit);
     response.setHeader("Cache-Control", "public, max-age=3600");
     response.setHeader("CDN-Cache-Control", "public, s-maxage=2592000, stale-while-revalidate=86400");
     return response.status(200).json({
       categoryId,
+      limit: rawLimit,
       ...result,
       cachedAt: new Date().toISOString(),
     });
