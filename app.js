@@ -16,6 +16,7 @@ const keywordPeriod = document.querySelector("#keyword-period");
 const keywordContent = document.querySelector("#keyword-content");
 const periodYear = document.querySelector("#period-year");
 const periodMonth = document.querySelector("#period-month");
+const keywordLimit = document.querySelector("#keyword-limit");
 const workList = document.querySelector("#work-list");
 const workCount = document.querySelector("#work-count");
 let activeCategoryId = "";
@@ -109,11 +110,12 @@ async function openPopularKeywords(categoryId) {
 async function fetchPopularKeywords() {
   const year = periodYear.value;
   const month = periodMonth.value;
-  keywordPeriod.textContent = `${year}년 ${String(month).padStart(2, "0")}월 · 전체 조건`;
-  keywordContent.innerHTML = '<div class="keywordState"><span class="spinner"></span><b>실제 인기검색어를 불러오는 중입니다.</b><p>네이버 데이터랩 TOP200을 조회하고 있어요.</p></div>';
+  const limit = keywordLimit.value;
+  keywordPeriod.textContent = `${year}년 ${String(month).padStart(2, "0")}월 · TOP${limit} · 전체 조건`;
+  keywordContent.innerHTML = `<div class="keywordState"><span class="spinner"></span><b>실제 인기검색어를 불러오는 중입니다.</b><p>네이버 데이터랩 TOP${limit}을 조회하고 있어요.</p></div>`;
 
   try {
-    const params = new URLSearchParams({ categoryId: activeCategoryId, year, month, limit: "200" });
+    const params = new URLSearchParams({ categoryId: activeCategoryId, year, month, limit });
     const response = await fetch(`${API_BASE_URL}/api/popular-keywords?${params}`);
     const data = await response.json();
     if (!response.ok || !Array.isArray(data.items)) throw new Error(data.message || "조회에 실패했습니다.");
